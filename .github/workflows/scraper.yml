@@ -26,11 +26,15 @@ jobs:
       - name: Install Chrome & Chromedriver
         run: |
           sudo apt update
-          sudo apt install -y snapd
-          sudo snap install chromium
-          sudo snap install chromedriver --classic
-          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
-          echo "CHROME_PATH=$(which chromium)" >> $GITHUB_ENV
+          sudo apt install -y chromium-browser
+          CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          wget https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          echo "CHROMEDRIVER_PATH=/usr/local/bin/chromedriver" >> $GITHUB_ENV
+          echo "CHROME_PATH=/usr/bin/chromium-browser" >> $GITHUB_ENV
+    
 
       - name: Run Scraper
         env:
