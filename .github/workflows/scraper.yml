@@ -2,7 +2,7 @@ name: Scrape VNIndex Data
 
 on:
   schedule:
-    - cron: "10 8 * * 1-5"  # Runs at 08:10 UTC (15:10 Vietnam Time, GMT+7)
+    - cron: "10 8 * * 1-5"  # Runs at 08:10 UTC (which is 15:10 Vietnam Time, GMT+7)
   workflow_dispatch:  # Allows manual runs
 
 jobs:
@@ -26,26 +26,15 @@ jobs:
       - name: Install Chrome & Chromedriver
         run: |
           sudo apt update
-          sudo apt install -y chromium-browser
-
-          # Get Chrome major version
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
-          
-          # Fetch the latest compatible Chromedriver version
-          DRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          
-          # Download and install Chromedriver
-          wget -N "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
-          unzip -o chromedriver_linux64.zip
-          sudo mv chromedriver /usr/bin/chromedriver
-          sudo chmod +x /usr/bin/chromedriver
-
-      - name: Verify Chrome & Chromedriver Versions
-        run: |
-          google-chrome --version
-          chromedriver --version
+          sudo apt install -y snapd
+          sudo snap install chromium
+          sudo snap install chromedriver --classic
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
+          echo "CHROME_PATH=$(which chromium)" >> $GITHUB_ENV
 
       - name: Run Scraper
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          CHROMEDRIVER_PATH: ${{ env.CHROMEDRIVER_PATH }}
+          CHROME_PATH: ${{ env.CHROME_PATH }}
         run: python vnindex_crawl.py
