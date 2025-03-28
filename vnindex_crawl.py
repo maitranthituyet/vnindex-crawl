@@ -1,10 +1,11 @@
 import os
-import sys
+import json
 import time
 import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -12,14 +13,29 @@ from selenium.webdriver.common.by import By
 # Setup Chrome options
 def setup_driver():
     chrome_options = Options()
-    chrome_options.add_argument('--headless')  
+    chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.binary_location = '/usr/bin/chromium-browser'
 
-    # Initialize WebDriver
     driver = webdriver.Chrome(options=chrome_options)
     return driver
+
+# Authenticate Google Sheets API
+def authenticate_google_sheets():
+    try:
+        creds_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
+        if not creds_json:
+            raise ValueError("Google Sheets credentials not found in environment variables.")
+
+        creds_dict = json.loads(creds_json)
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+        return client
+    except Exception as e:
+        print(f"Google Sheets authentication failed: {e}")
+        return None
 
 # Scrape Data
 def scrape_data():
@@ -41,31 +57,46 @@ def scrape_data():
             if len(cells) > 5:
                 date = cells[0].text.strip()
                 amount = cells[5].text.strip()
-                data.append({'date': date, 'amount': amount})
+                data.append({'Date': date, 'Amount': amount})
 
         df = pd.DataFrame(data)
-        df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
+        df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
 
         return df
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error during scraping: {e}")
         return None
     finally:
         driver.quit()
 
-# Save data to CSV
-def save_to_csv(df, file_path="output.csv"):
+# Save data to Google Sheets (Replace Data)
+def save_to_google_sheets(df, sheet_name="VNIndex_Data"):
     if df is not None:
-        df.to_csv(file_path, index=False)
-        print(f"Data saved to {file_path}")
+        try:
+            client = authenticate_google_sheets()
+            if client is None:
+                print("Google Sheets client authentication failed.")
+                return
+
+            sheet = client.open("VNIndex_Data").worksheet("crawl_data")
+
+            # Clear old data before adding new data
+            sheet.clear()
+            sheet.append_rows([df.columns.tolist()] + df.values.tolist())
+
+            print(f"Data replaced successfully in Google Sheets: {sheet_name}")
+
+        except Exception as e:
+            print(f"Failed to save data to Google Sheets: {e}")
+
     else:
         print("No data to save.")
 
-# Main function to run script
+# Main function
 def main():
     df = scrape_data()
-    save_to_csv(df, "output.csv")
+    save_to_google_sheets(df)
 
 if __name__ == "__main__":
     main()
