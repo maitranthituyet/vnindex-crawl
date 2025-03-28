@@ -57,10 +57,12 @@ def scrape_data():
             if len(cells) > 5:
                 date = cells[0].text.strip()
                 amount = cells[5].text.strip()
-                data.append({'Date': date, 'Amount': amount})
+                data.append({'date': date, 'amount': amount})
 
         df = pd.DataFrame(data)
-        df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+        df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
+        df["date"] = df["date"].astype(str)
+        df["amount"] = df["amount"].replace(",", "", regex=True).astype(float)
 
         return df
 
