@@ -36,4 +36,4 @@ jobs:
       - name: Run Scraper
         env:
           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-        run: python vnindex_scraper.py
+        run: python vnindex_crawl.py
