@@ -1,38 +1,39 @@
-name: VNIndex Crawl Automation
+name: Scrape VNIndex Data
 
 on:
   schedule:
-    - cron: "10 15 * * 1-5"  # Run at 15:10 UTC (3:10 PM) on weekdays (Mon-Fri)
-  workflow_dispatch:  # Allows manual triggering
+    - cron: "10 8 * * 1-5"  # Runs at 08:10 UTC (which is 15:10 Vietnam Time, GMT+7)
+  workflow_dispatch:  # Allows manual runs
 
 jobs:
-  crawl_and_push:
+  scrape:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set Up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          pip install selenium pandas
-          sudo apt-get update -y
-          sudo apt-get install -y wget curl unzip chromium-chromedriver
+          python -m pip install --upgrade pip
+          pip install pandas gspread oauth2client selenium
 
-      - name: Run VNIndex Crawler
-        run: python vnindex_crawl.py
-
-      - name: Commit and Push Changes
+      - name: Install Chrome & Chromedriver
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions@github.com"
-          git add output.csv
-          git commit -m "Auto-update VNIndex data"
-          git push
+          sudo apt update
+          sudo apt install -y chromium-browser
+          CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          wget -N https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/bin/chromedriver
+          sudo chmod +x /usr/bin/chromedriver
+
+      - name: Run Scraper
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+        run: python vnindex_scraper.py
