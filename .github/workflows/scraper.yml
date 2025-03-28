@@ -1,0 +1,36 @@
+name: Daily VNIndex Scraper
+
+on:
+  schedule:
+    - cron: "15 15 * * *"  # Runs every day at 3:30 PM UTC (Adjust if needed)
+  workflow_dispatch:  # Allows manual execution
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install selenium pandas
+          sudo apt-get update
+          sudo apt-get install -y chromium-chromedriver
+
+      - name: Run Scraper
+        run: python vnindex_crawl.py
+
+      - name: Commit and Push CSV
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add output.csv
+          git commit -m "Auto-update VNIndex data"
+          git push
