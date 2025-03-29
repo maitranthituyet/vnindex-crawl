@@ -65,8 +65,8 @@ def scrape_data():
                     'block_trade_volume': cells[6].text.strip(),
                     'block_trade_value': cells[7].text.strip(),
                     'opening_price': cells[8].text.strip(),
-                    'lowest_price': cells[9].text.strip(),
-                    'highest_price': cells[10].text.strip()
+                    'highest_price': cells[9].text.strip(),
+                    'lowest_price': cells[10].text.strip()
                 })
 
         df = pd.DataFrame(data)
