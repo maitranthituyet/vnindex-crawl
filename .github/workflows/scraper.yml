@@ -39,4 +39,4 @@ jobs:
         run: python vnindex_crawl.py
 
       - name: Trigger Google Apps Script
-        run: curl -X GET "https://script.google.com/macros/s/AKfycbzMlwCu_RntIGbzX5XTFgo02KsblOoun5JlKSn7GtxICCSjd_7bZdTObjoi5vsUnX7t8g/exec"
+        run: curl -X GET "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec?key=${{ secrets.GAS_API_KEY }}"
