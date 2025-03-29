@@ -73,7 +73,7 @@ def scrape_data():
         df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
         df.sort_values(by='date', ascending=False, inplace=True)
         df["date"] = df["date"].astype(str)
-        df["amount"] = df["amount"].replace(",", "", regex=True).astype(float)
+        # df["amount"] = df["amount"].replace(",", "", regex=True).astype(float)
 
         return df
 
