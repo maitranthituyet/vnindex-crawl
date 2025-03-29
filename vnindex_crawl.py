@@ -55,12 +55,23 @@ def scrape_data():
         for row in rows:
             cells = row.find_elements(By.TAG_NAME, 'td')
             if len(cells) > 5:
-                date = cells[0].text.strip()
-                amount = cells[5].text.strip()
-                data.append({'date': date, 'amount': amount})
+                data.append({
+                    'date': cells[0].text.strip(),
+                    'closing_price': cells[1].text.strip(),
+                    'adjusted_price': cells[2].text.strip(),
+                    'change': cells[3].text.strip(),
+                    'order_matching_volume': cells[4].text.strip(),
+                    'order_matching_value': cells[5].text.strip(),
+                    'block_trade_volume': cells[6].text.strip(),
+                    'block_trade_value': cells[7].text.strip(),
+                    'opening_price': cells[8].text.strip(),
+                    'lowest_price': cells[9].text.strip(),
+                    'highest_price': cells[10].text.strip()
+                })
 
         df = pd.DataFrame(data)
         df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
+        df.sort_values(by='date', ascending=False, inplace=True)
         df["date"] = df["date"].astype(str)
         df["amount"] = df["amount"].replace(",", "", regex=True).astype(float)
 
