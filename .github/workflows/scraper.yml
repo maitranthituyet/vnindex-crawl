@@ -37,3 +37,6 @@ jobs:
           CHROMEDRIVER_PATH: ${{ env.CHROMEDRIVER_PATH }}
           CHROME_PATH: ${{ env.CHROME_PATH }}
         run: python vnindex_crawl.py
+
+      - name: Trigger Google Apps Script
+        run: curl -X GET "https://script.google.com/macros/s/AKfycbzMlwCu_RntIGbzX5XTFgo02KsblOoun5JlKSn7GtxICCSjd_7bZdTObjoi5vsUnX7t8g/exec"
