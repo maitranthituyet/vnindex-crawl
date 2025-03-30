@@ -92,7 +92,7 @@ def save_to_google_sheets(df, sheet_name="VNIndex_Data"):
                 print("Google Sheets client authentication failed.")
                 return
 
-            sheet = client.open("VNIndex_Data").worksheet("crawl_data")
+            sheet = client.open(sheet_name).worksheet("crawl_data")
 
             # Clear old data before adding new data
             sheet.clear()
