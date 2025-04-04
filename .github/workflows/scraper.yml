@@ -2,7 +2,7 @@ name: Scrape VNIndex Data
 
 on:
   schedule:
-    - cron: "50 07 * * 1-5"  # Runs at 08:10 UTC (which is 15:10 Vietnam Time, GMT+7) "49 18 * * 1-5" 
+    - cron: "55 07 * * 1-5"  # Runs at 08:10 UTC (which is 15:10 Vietnam Time, GMT+7) "49 18 * * 1-5" 
   workflow_dispatch:  # Allows manual runs
 
 jobs:
